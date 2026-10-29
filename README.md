@@ -66,7 +66,7 @@ Nothing leaves your machine. `todo-age` only reads your local repository.
 Add a summary of the oldest markers to every run, and optionally fail the build when something gets too old:
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v7
   with:
     fetch-depth: 0            # full history, so the ages are correct
 - uses: nicoleyangcoding/todo-age@v0
