@@ -4,7 +4,7 @@ Small, focused releases. Suggestions are welcome in [issues](https://github.com/
 
 ## 0.2
 - [ ] `--by-author`: a summary table of marker counts and median age per person
-- [ ] `--exclude` option for paths like `vendor/` or generated code
+- [x] `--exclude` option for paths like `vendor/` or generated code
 - [ ] Optional config in `pyproject.toml` (`[tool.todo-age]`) for tags and excludes
 
 ## 0.3

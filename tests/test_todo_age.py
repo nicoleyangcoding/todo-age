@@ -56,6 +56,22 @@ def test_ignores_binary_and_gitignored(repo):
     assert [i.path for i in scan(repo.path)] == ["a.py"]
 
 
+def test_exclude(repo, capsys):
+    repo.write("app.py", "# TODO keep\n")
+    repo.write("vendor/lib.py", "# TODO not ours\n")
+    repo.write("static/app.min.js", "/* FIXME minified */\n")
+    repo.write("src/vendor/inner.py", "# TODO nested folder, same name\n")
+    repo.commit(days_ago=10)
+
+    def paths(*args):
+        assert main(["-C", str(repo.path), "--format", "json", *args]) == 0
+        return sorted(i["file"] for i in json.loads(capsys.readouterr().out)["items"])
+
+    assert paths("--exclude", "vendor/", "--exclude", "*.min.js") == ["app.py", "src/vendor/inner.py"]
+    assert paths("--exclude", "vendor") == ["app.py", "src/vendor/inner.py", "static/app.min.js"]
+    assert paths("src", "static", "--exclude", "src/vendor") == ["static/app.min.js"]
+
+
 def test_not_a_repo(tmp_path):
     with pytest.raises(GitError):
         scan(tmp_path)

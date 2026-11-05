@@ -19,6 +19,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("paths", nargs="*", help="limit the search to these files or folders")
     parser.add_argument("--older-than", metavar="AGE", help="only show markers older than AGE (90d, 6m, 1y)")
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="skip files or folders matching PATH, like vendor/ or '*.min.js' (repeatable)",
+    )
     parser.add_argument("--author", help="only show markers whose author name or email contains this text")
     parser.add_argument(
         "--tags",
@@ -55,7 +62,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--tags needs at least one marker")
 
     try:
-        items = scan(Path(args.directory), tags, tuple(args.paths))
+        pathspecs = tuple(args.paths) + tuple(f":(exclude){p}" for p in args.exclude)
+        items = scan(Path(args.directory), tags, pathspecs)
     except GitError as exc:
         print(f"todo-age: {exc}", file=sys.stderr)
         return 2

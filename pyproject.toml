@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "todo-age"
-version = "0.1.0"
+version = "0.2.0"
 description = "List every TODO, FIXME and HACK in a git repo, oldest first, using git blame."
 readme = "README.md"
 license = "MIT"

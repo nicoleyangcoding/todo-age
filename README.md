@@ -35,6 +35,7 @@ No dependencies, no configuration. It runs in well under a second on most repos.
 todo-age --older-than 1y            # only the ones older than a year
 todo-age --author dana              # one person's markers (matches name or email)
 todo-age src/billing                # one folder
+todo-age --exclude vendor/          # skip a folder (repeat for more)
 todo-age --tags TODO,FIXME,BUG      # your own set of markers
 todo-age --format markdown > TODOS.md
 todo-age --format json | jq '.items[0]'
@@ -43,6 +44,7 @@ todo-age --format json | jq '.items[0]'
 | Option | What it does |
 | --- | --- |
 | `--older-than AGE` | Hide markers newer than `AGE`. Ages look like `90d`, `6m`, `2y`. |
+| `--exclude PATH` | Skip files or folders matching `PATH` (a folder like `vendor/` or a pattern like `*.min.js`). Repeat it for more. |
 | `--author TEXT` | Only markers whose blamed author name or email contains `TEXT`. |
 | `--tags LIST` | Markers to look for. Default: `TODO,FIXME,HACK,XXX`. |
 | `--format` | `table` (default), `markdown`, `json` or `csv`. |
