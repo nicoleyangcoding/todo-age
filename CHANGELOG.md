@@ -2,6 +2,11 @@
 
 All notable changes are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-11-15
+
+### Added
+- Issue references right after a marker, like `TODO(#123)`, `FIXME(dana, #45)` or `TODO #123:`, are picked up. JSON and CSV output get an `issue` field (a new last column in CSV), and Markdown output links the number to the issue when `--repo-url` is set.
+
 ## [0.2.0] - 2026-11-05
 
 ### Added

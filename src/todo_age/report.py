@@ -61,6 +61,7 @@ def _rows(items: list[Item], now: float) -> list[dict[str, object]]:
             "line": i.line,
             "tag": i.tag,
             "text": i.text,
+            "issue": i.issue,
             "commit": i.commit if i.committed else None,
         }
         for i in items
@@ -100,6 +101,9 @@ def markdown(items: list[Item], now: float, repo_url: str | None = None) -> str:
         if repo_url and row["commit"]:
             loc = f"[{loc}]({repo_url}/blob/{row['commit']}/{row['file']}#L{row['line']})"
         text = str(row["text"]).replace("|", "\\|")
+        if repo_url and row["issue"]:
+            ref = f"#{row['issue']}"
+            text = text.replace(ref, f"[{ref}]({repo_url}/issues/{row['issue']})", 1)
         out.append(f"| {row['age']} | {row['author']} | {loc} | {text} |")
     return "\n".join(out)
 
@@ -110,7 +114,7 @@ def as_json(items: list[Item], now: float) -> str:
 
 def as_csv(items: list[Item], now: float) -> str:
     buffer = io.StringIO()
-    fields = ["age_days", "author", "email", "file", "line", "tag", "text", "commit"]
+    fields = ["age_days", "author", "email", "file", "line", "tag", "text", "commit", "issue"]
     writer = csv.DictWriter(buffer, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
     writer.writeheader()
     writer.writerows(_rows(items, now))

@@ -51,7 +51,7 @@ todo-age --format json | jq '.items[0]'
 | `--limit N` | Show the N oldest. |
 | `--newest-first` | Reverse the order. |
 | `--fail-if-older-than AGE` | Exit with status 1 if anything is older than `AGE`. Useful in CI. |
-| `--repo-url URL` | In Markdown output, link each location to its line on GitHub. |
+| `--repo-url URL` | In Markdown output, link each location to its line on GitHub, and issue references like `TODO(#123)` to the issue. |
 | `-C DIR` | Run in another directory. |
 
 ## How it works
@@ -60,6 +60,7 @@ todo-age --format json | jq '.items[0]'
 2. A marker must be a whole word in uppercase, so `todo_list` and `TODOS` don't count.
 3. `git blame` runs once per file, only on the matching lines, to get each line's author and date. Whitespace-only changes are ignored, so reformatting doesn't reset a TODO's age.
 4. Lines you haven't committed yet show as `new` with the author `(uncommitted)`.
+5. An issue number right after the marker, as in `TODO(#123)`, `FIXME(dana, #45)` or `TODO #123:`, goes in the `issue` field of JSON and CSV output.
 
 Nothing leaves your machine. `todo-age` only reads your local repository.
 

@@ -12,6 +12,8 @@ from pathlib import Path
 
 DEFAULT_TAGS = ("TODO", "FIXME", "HACK", "XXX")
 UNCOMMITTED = "0" * 40
+# An issue number right after the marker: "(#123)", "(dana, #45)" or " #123:".
+_ISSUE = re.compile(r"^\w+(?:\s*\([^)]*?#(\d+)[^)]*\)|:?\s+#(\d+)\b)")
 
 
 class GitError(Exception):
@@ -32,6 +34,11 @@ class Item:
     @property
     def committed(self) -> bool:
         return self.commit != UNCOMMITTED
+
+    @property
+    def issue(self) -> int | None:
+        match = _ISSUE.match(self.text)
+        return int(match.group(1) or match.group(2)) if match else None
 
 
 def git(repo: Path, *args: str) -> str:

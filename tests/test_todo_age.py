@@ -125,7 +125,7 @@ def test_csv(repo, capsys):
     _setup(repo)
     main(["-C", str(repo.path), "--format", "csv"])
     lines = capsys.readouterr().out.splitlines()
-    assert lines[0] == "age_days,author,email,file,line,tag,text,commit"
+    assert lines[0] == "age_days,author,email,file,line,tag,text,commit,issue"
     assert len(lines) == 5
 
 
@@ -158,3 +158,27 @@ def test_file_names_with_spaces(repo):
     repo.commit(days_ago=3)
     (item,) = scan(repo.path)
     assert item.path == "my notes/plan v2.md" and item.author == "Test"
+
+
+def test_issue_references(repo, capsys):
+    repo.write(
+        "a.py",
+        "# TODO(#123): drop the shim\n"
+        "# FIXME(dana, #45) flaky\n"
+        "# TODO #7: rename\n"
+        "# TODO: see #99 later\n"
+        "# HACK(dana) no issue\n",
+    )
+    repo.commit(days_ago=3)
+    issues = {i.line: i.issue for i in scan(repo.path)}
+    assert issues == {1: 123, 2: 45, 3: 7, 4: None, 5: None}
+
+    url = "https://github.com/you/repo"
+    assert main(["-C", str(repo.path), "--format", "markdown", "--repo-url", url]) == 0
+    out = capsys.readouterr().out
+    assert f"TODO([#123]({url}/issues/123)): drop the shim" in out
+    assert "see #99 later" in out
+
+    assert main(["-C", str(repo.path), "--format", "json"]) == 0
+    rows = {r["line"]: r["issue"] for r in json.loads(capsys.readouterr().out)["items"]}
+    assert rows[1] == 123 and rows[4] is None

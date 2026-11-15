@@ -10,7 +10,7 @@ Small, focused releases. Suggestions are welcome in [issues](https://github.com/
 ## 0.3
 - [ ] Monthly GitHub Action recipe that opens or updates an issue with the oldest markers
 - [ ] Badge endpoint showing the median TODO age
-- [ ] Show the issue number when a marker references one, like `TODO(#123)`
+- [x] Show the issue number when a marker references one, like `TODO(#123)`
 
 ## Later
 - [ ] `--since <commit>`: only markers added after a given commit, for pull request checks
