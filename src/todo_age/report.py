@@ -68,6 +68,71 @@ def _rows(items: list[Item], now: float) -> list[dict[str, object]]:
     ]
 
 
+def by_author(items: list[Item], now: float) -> list[dict[str, object]]:
+    """One row per author: marker count, median and oldest age. Most markers first."""
+    ages: dict[str, list[int]] = {}
+    for item in items:
+        ages.setdefault(item.author, []).append(age_days(item, now))
+    rows = [
+        {
+            "author": author,
+            "markers": len(days),
+            "median_age_days": int(statistics.median(days)),
+            "oldest_age_days": max(days),
+        }
+        for author, days in ages.items()
+    ]
+    rows.sort(key=lambda r: (-r["markers"], -r["oldest_age_days"], r["author"]))
+    return rows
+
+
+def author_table(rows: list[dict[str, object]]) -> str:
+    head = ("AUTHOR", "MARKERS", "MEDIAN", "OLDEST")
+    body = [
+        (
+            _clip(str(r["author"]), 30),
+            str(r["markers"]),
+            human_age(r["median_age_days"]),
+            human_age(r["oldest_age_days"]),
+        )
+        for r in rows
+    ]
+    widths = [max(len(head[n]), *(len(b[n]) for b in body)) if body else len(head[n]) for n in range(4)]
+    lines = []
+    for author, count, median, oldest in (head, *body):
+        lines.append(f"{author:<{widths[0]}}  {count:>{widths[1]}}  {median:<{widths[2]}}  {oldest}".rstrip())
+    return "\n".join(lines)
+
+
+def author_markdown(rows: list[dict[str, object]], items: list[Item], now: float) -> str:
+    out = [
+        f"**{summary(items, now)}**",
+        "",
+        "| Author | Markers | Median age | Oldest |",
+        "| --- | --- | --- | --- |",
+    ]
+    for r in rows:
+        author = str(r["author"]).replace("|", "\\|")
+        out.append(
+            f"| {author} | {r['markers']} | {human_age(r['median_age_days'])} | "
+            f"{human_age(r['oldest_age_days'])} |"
+        )
+    return "\n".join(out)
+
+
+def author_json(rows: list[dict[str, object]], items: list[Item], now: float) -> str:
+    return json.dumps({"summary": summary(items, now), "authors": rows}, indent=2)
+
+
+def author_csv(rows: list[dict[str, object]]) -> str:
+    buffer = io.StringIO()
+    fields = ["author", "markers", "median_age_days", "oldest_age_days"]
+    writer = csv.DictWriter(buffer, fieldnames=fields, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue()
+
+
 def _clip(text: str, width: int) -> str:
     return text if len(text) <= width else text[: max(1, width - 3)] + "..."
 

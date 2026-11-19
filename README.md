@@ -34,6 +34,7 @@ No dependencies, no configuration. It runs in well under a second on most repos.
 ```bash
 todo-age --older-than 1y            # only the ones older than a year
 todo-age --author dana              # one person's markers (matches name or email)
+todo-age --by-author                # who owns the debt: count, median and oldest per person
 todo-age src/billing                # one folder
 todo-age --exclude vendor/          # skip a folder (repeat for more)
 todo-age --tags TODO,FIXME,BUG      # your own set of markers
@@ -46,9 +47,10 @@ todo-age --format json | jq '.items[0]'
 | `--older-than AGE` | Hide markers newer than `AGE`. Ages look like `90d`, `6m`, `2y`. |
 | `--exclude PATH` | Skip files or folders matching `PATH` (a folder like `vendor/` or a pattern like `*.min.js`). Repeat it for more. |
 | `--author TEXT` | Only markers whose blamed author name or email contains `TEXT`. |
+| `--by-author` | One row per author with their marker count, median age and oldest marker. Works with every `--format`. |
 | `--tags LIST` | Markers to look for. Default: `TODO,FIXME,HACK,XXX`. |
 | `--format` | `table` (default), `markdown`, `json` or `csv`. |
-| `--limit N` | Show the N oldest. |
+| `--limit N` | Show the N oldest (or the top N authors with `--by-author`). |
 | `--newest-first` | Reverse the order. |
 | `--fail-if-older-than AGE` | Exit with status 1 if anything is older than `AGE`. Useful in CI. |
 | `--repo-url URL` | In Markdown output, link each location to its line on GitHub, and issue references like `TODO(#123)` to the issue. |

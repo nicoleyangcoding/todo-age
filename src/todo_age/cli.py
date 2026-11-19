@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from . import __version__, report
-from .scan import DEFAULT_TAGS, GitError, scan
+from .scan import DEFAULT_TAGS, GitError, Item, scan
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -32,8 +32,15 @@ def build_parser() -> argparse.ArgumentParser:
         default=",".join(DEFAULT_TAGS),
         help=f"comma-separated markers to look for (default: {','.join(DEFAULT_TAGS)})",
     )
+    parser.add_argument(
+        "--by-author",
+        action="store_true",
+        help="summarize per author: marker count, median age and oldest",
+    )
     parser.add_argument("--format", choices=["table", "markdown", "json", "csv"], default="table")
-    parser.add_argument("--limit", type=int, metavar="N", help="show at most N markers")
+    parser.add_argument(
+        "--limit", type=int, metavar="N", help="show at most N markers, or authors with --by-author"
+    )
     parser.add_argument("--newest-first", action="store_true", help="reverse the sort order")
     parser.add_argument(
         "--fail-if-older-than",
@@ -77,8 +84,19 @@ def main(argv: list[str] | None = None) -> int:
 
     items.sort(key=lambda i: (report.age_days(i, now), i.path, i.line), reverse=not args.newest_first)
     stale = fail_age is not None and any(report.age_days(i, now) >= fail_age for i in items)
-    shown = items[: args.limit] if args.limit else items
+    if args.by_author:
+        print_authors(args, items, now)
+    else:
+        print_items(args, items, now)
 
+    if stale:
+        print(f"todo-age: found markers older than {args.fail_if_older_than}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def print_items(args: argparse.Namespace, items: list[Item], now: float) -> None:
+    shown = items[: args.limit] if args.limit else items
     if args.format == "json":
         print(report.as_json(shown, now))
     elif args.format == "csv":
@@ -93,10 +111,23 @@ def main(argv: list[str] | None = None) -> int:
         if args.limit and len(items) > len(shown):
             print(f"Showing the {len(shown)} oldest. Remove --limit to see all.")
 
-    if stale:
-        print(f"todo-age: found markers older than {args.fail_if_older_than}", file=sys.stderr)
-        return 1
-    return 0
+
+def print_authors(args: argparse.Namespace, items: list[Item], now: float) -> None:
+    rows = report.by_author(items, now)
+    shown = rows[: args.limit] if args.limit else rows
+    if args.format == "json":
+        print(report.author_json(shown, items, now))
+    elif args.format == "csv":
+        sys.stdout.write(report.author_csv(shown))
+    elif args.format == "markdown":
+        print(report.author_markdown(shown, items, now))
+    else:
+        if shown:
+            print(report.author_table(shown))
+            print()
+        print(report.summary(items, now))
+        if args.limit and len(rows) > len(shown):
+            print(f"Showing {len(shown)} of {len(rows)} authors. Remove --limit to see all.")
 
 
 if __name__ == "__main__":

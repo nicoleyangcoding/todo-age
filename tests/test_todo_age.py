@@ -182,3 +182,31 @@ def test_issue_references(repo, capsys):
     assert main(["-C", str(repo.path), "--format", "json"]) == 0
     rows = {r["line"]: r["issue"] for r in json.loads(capsys.readouterr().out)["items"]}
     assert rows[1] == 123 and rows[4] is None
+
+
+def test_by_author(repo, capsys):
+    _setup(repo)
+    rows = report.by_author(scan(repo.path), time.time())
+    assert [(r["author"], r["markers"]) for r in rows] == [("Lee", 2), ("Dana", 1), ("Sam", 1)]
+    assert 99 <= rows[0]["median_age_days"] <= 101
+
+    assert main(["-C", str(repo.path), "--by-author"]) == 0
+    out = capsys.readouterr().out.splitlines()
+    assert out[0].split() == ["AUTHOR", "MARKERS", "MEDIAN", "OLDEST"]
+    assert out[1].split()[:2] == ["Lee", "2"]
+    assert out[-1].startswith("4 markers")
+
+    main(["-C", str(repo.path), "--by-author", "--format", "json", "--older-than", "1y"])
+    data = json.loads(capsys.readouterr().out)
+    assert [r["author"] for r in data["authors"]] == ["Dana"]
+
+    main(["-C", str(repo.path), "--by-author", "--format", "csv"])
+    lines = capsys.readouterr().out.splitlines()
+    assert lines[0] == "author,markers,median_age_days,oldest_age_days" and len(lines) == 4
+
+    main(["-C", str(repo.path), "--by-author", "--format", "markdown"])
+    assert "| Author | Markers | Median age | Oldest |" in capsys.readouterr().out
+
+    main(["-C", str(repo.path), "--by-author", "--limit", "1"])
+    assert "Showing 1 of 3 authors" in capsys.readouterr().out
+    assert main(["-C", str(repo.path), "--by-author", "--fail-if-older-than", "2y"]) == 1

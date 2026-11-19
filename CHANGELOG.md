@@ -2,6 +2,11 @@
 
 All notable changes are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-11-19
+
+### Added
+- `--by-author` prints one row per person with their marker count, median age and oldest marker, most markers first. It works with every output format and with the usual filters, and `--limit` caps the number of authors.
+
 ## [0.3.0] - 2026-11-15
 
 ### Added

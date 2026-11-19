@@ -3,7 +3,7 @@
 Small, focused releases. Suggestions are welcome in [issues](https://github.com/nicoleyangcoding/todo-age/issues).
 
 ## 0.2
-- [ ] `--by-author`: a summary table of marker counts and median age per person
+- [x] `--by-author`: a summary table of marker counts and median age per person
 - [x] `--exclude` option for paths like `vendor/` or generated code
 - [ ] Optional config in `pyproject.toml` (`[tool.todo-age]`) for tags and excludes
 
